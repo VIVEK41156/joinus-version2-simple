@@ -535,33 +535,48 @@ const App = (() => {
             extracted.lastName = parts.slice(1).join(' ');
         }
 
-        // --- Name Strategy 2: Top-of-document capitalized token scan ---
-        // PDF.js often strips newlines; scan the first 300 chars for consecutive Title-case words
+        // --- Blocklist: words that CANNOT be someone's name ---
+        const NOT_A_NAME = new Set([
+            'Resume','Curriculum','Vitae','Summary','Experience','Education','Skills','Projects',
+            'Objective','Profile','Contact','References','Languages','Certifications','Awards',
+            'React','Angular','Vue','Node','Python','Java','Django','Flask','Spring','Docker',
+            'Kubernetes','MongoDB','PostgreSQL','MySQL','Redis','GraphQL','TypeScript','JavaScript',
+            'HTML','CSS','Swift','Kotlin','Flutter','iOS','AWS','Azure','GCP','Linux','Git',
+            'Jenkins','Selenium','Cypress','Figma','Machine','Learning','Artificial','Intelligence',
+            'Data','Science','Analytics','Engineering','Developer','Engineer','Manager','Designer',
+            'Architect','Analyst','Consultant','Intern','Software','Frontend','Backend','Mobile',
+            'Senior','Junior','Lead','Principal','Bachelor','Master','University','College',
+            'Institute','Technology','Information','Systems','Computer','Business','Administration'
+        ]);
+        const isValidNameToken = w => /^[A-Z][a-zA-Z'\-]{1,}$/.test(w) && !NOT_A_NAME.has(w);
+
+        // --- Name Strategy 2: Scan only the very first 5 non-empty lines ---
+        // A person's name appears on line 1 of 99% of professional resumes.
         if (!extracted.firstName) {
-            const top = text.slice(0, 400).replace(/[^a-zA-Z\s'-]/g, ' ');
-            const tokens = top.split(/\s+/).filter(t => t.length > 1);
-            const isCap = t => /^[A-Z][a-zA-Z'-]{1,}$/.test(t);
-            for (let i = 0; i < tokens.length - 1; i++) {
-                if (isCap(tokens[i]) && isCap(tokens[i + 1])) {
-                    extracted.firstName = tokens[i];
-                    extracted.lastName = tokens[i + 1];
-                    if (tokens[i + 2] && isCap(tokens[i + 2])) {
-                        extracted.lastName += ' ' + tokens[i + 2];
-                    }
+            const firstLines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+            for (const line of firstLines.slice(0, 5)) {
+                if (/[@\d|\u2022|http|www|linkedin|github|resume|curriculum|skills|profile|objective]/i.test(line)) continue;
+                const parts = line.split(/\s+/).filter(Boolean);
+                if (parts.length >= 2 && parts.length <= 4 && parts.every(isValidNameToken)) {
+                    extracted.firstName = parts[0];
+                    extracted.lastName = parts.slice(1).join(' ');
                     break;
                 }
             }
         }
 
-        // --- Name Strategy 3: Line-by-line fallback ---
+        // --- Name Strategy 3: Top-of-doc token scan (for PDFs that strip all newlines) ---
+        // Scan only the FIRST 12 meaningful tokens to avoid going deep into tech skills
         if (!extracted.firstName) {
-            const lines = text.split(/[\n|]/).map(l => l.trim()).filter(Boolean);
-            for (const line of lines.slice(0, 15)) {
-                if (/[@\d|\u2022|http|www|linkedin|github|resume|curriculum]/i.test(line)) continue;
-                const parts = line.trim().split(/\s+/);
-                if (parts.length >= 2 && parts.length <= 4 && parts.every(p => /^[A-Za-z.'-]+$/.test(p))) {
-                    extracted.firstName = parts[0];
-                    extracted.lastName = parts.slice(1).join(' ');
+            const top = text.slice(0, 200).replace(/[^a-zA-Z\s'\-]/g, ' ');
+            const tokens = top.split(/\s+/).filter(t => t.length > 1);
+            for (let i = 0; i < Math.min(tokens.length - 1, 12); i++) {
+                if (isValidNameToken(tokens[i]) && isValidNameToken(tokens[i + 1])) {
+                    extracted.firstName = tokens[i];
+                    extracted.lastName = tokens[i + 1];
+                    if (tokens[i + 2] && isValidNameToken(tokens[i + 2])) {
+                        extracted.lastName += ' ' + tokens[i + 2];
+                    }
                     break;
                 }
             }
