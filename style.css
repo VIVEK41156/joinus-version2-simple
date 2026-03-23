@@ -392,6 +392,17 @@ a:hover { text-decoration: underline; }
   margin-bottom: 40px;
 }
 
+@media (min-width: 768px) {
+  .v4_info_joinus_v2-jobs-grid {
+    min-height: 520px; /* Prevents height collapse and auto-scrolling when hitting shorter pagination pages natively */
+  }
+}
+
+@keyframes v4JobFadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* Job Card */
 .v4_info_joinus_v2-job-card {
   background: var(--v4-joinus-white);
@@ -402,6 +413,7 @@ a:hover { text-decoration: underline; }
   transition: var(--v4-joinus-transition);
   display: flex;
   flex-direction: column;
+  animation: v4JobFadeIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 .v4_info_joinus_v2-job-card:hover {
