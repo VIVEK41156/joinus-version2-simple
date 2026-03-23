@@ -256,7 +256,11 @@ const App = (() => {
         mountButton(
             '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>',
             State.currentPage === 1,
-            () => { State.currentPage--; renderJobGrid(); }
+            () => { 
+                State.currentPage--; 
+                renderJobGrid(); 
+                document.querySelector('.v4_info_joinus_v2-jobs-header')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         );
 
         // Render Numbered Page Links
@@ -264,7 +268,11 @@ const App = (() => {
             mountButton(
                 i,
                 false,
-                () => { State.currentPage = i; renderJobGrid(); },
+                () => { 
+                    State.currentPage = i; 
+                    renderJobGrid(); 
+                    document.querySelector('.v4_info_joinus_v2-jobs-header')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                },
                 State.currentPage === i ? 'active' : ''
             );
         }
@@ -273,7 +281,11 @@ const App = (() => {
         mountButton(
             '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>',
             State.currentPage === totalPages,
-            () => { State.currentPage++; renderJobGrid(); }
+            () => { 
+                State.currentPage++; 
+                renderJobGrid(); 
+                document.querySelector('.v4_info_joinus_v2-jobs-header')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         );
     };
 

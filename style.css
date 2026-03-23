@@ -394,7 +394,7 @@ a:hover { text-decoration: underline; }
 
 @media (min-width: 768px) {
   .v4_info_joinus_v2-jobs-grid {
-    min-height: 520px; /* Prevents height collapse and auto-scrolling when hitting shorter pagination pages natively */
+    min-height: 650px; /* Prevents height collapse and auto-scrolling when hitting shorter pagination pages natively */
   }
 }
 
