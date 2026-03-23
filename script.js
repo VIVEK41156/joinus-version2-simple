@@ -513,31 +513,57 @@ const App = (() => {
 
     /**
      * Extracts structured fields from resume text using Regex.
-     * Detects: Email, Phone, and First/Last Name from the document content.
+     * Detects: Email, Phone, and First/Last Name using 3 fallback strategies.
      * @param {string} text - Raw text extracted from the uploaded document
      */
     const parseResumeText = (text) => {
         const extracted = {};
 
-        // --- Email: match standard email patterns ---
+        // --- Email ---
         const emailMatch = text.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
         if (emailMatch) extracted.email = emailMatch[0];
 
-        // --- Phone: handle various international formats ---
-        const phoneMatch = text.match(/(\+?\d[\d\s\-().]{6,}\d)/);
+        // --- Phone ---
+        const phoneMatch = text.match(/(\+?\d[\d\s\-().]{6,20}\d)/);
         if (phoneMatch) extracted.phone = phoneMatch[0].trim();
 
-        // --- Name: typically the first non-empty line of a resume ---
-        const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
-        for (const line of lines) {
-            // Skip lines that look like contact info or headers
-            if (/[@\d|•|http|www|linkedin|github]/i.test(line)) continue;
-            // Name lines are usually 2-4 words of only letters
-            const nameParts = line.split(/\s+/);
-            if (nameParts.length >= 2 && nameParts.length <= 5 && nameParts.every(p => /^[a-zA-Z.'-]+$/.test(p))) {
-                extracted.firstName = nameParts[0];
-                extracted.lastName = nameParts.slice(1).join(' ');
-                break;
+        // --- Name Strategy 1: Explicit "Name:" label ---
+        const labelMatch = text.match(/(?:name|full\s*name)\s*[:\-]\s*([A-Z][a-z]+(?:\s[A-Z][a-z]+)+)/i);
+        if (labelMatch) {
+            const parts = labelMatch[1].trim().split(/\s+/);
+            extracted.firstName = parts[0];
+            extracted.lastName = parts.slice(1).join(' ');
+        }
+
+        // --- Name Strategy 2: Top-of-document capitalized token scan ---
+        // PDF.js often strips newlines; scan the first 300 chars for consecutive Title-case words
+        if (!extracted.firstName) {
+            const top = text.slice(0, 400).replace(/[^a-zA-Z\s'-]/g, ' ');
+            const tokens = top.split(/\s+/).filter(t => t.length > 1);
+            const isCap = t => /^[A-Z][a-zA-Z'-]{1,}$/.test(t);
+            for (let i = 0; i < tokens.length - 1; i++) {
+                if (isCap(tokens[i]) && isCap(tokens[i + 1])) {
+                    extracted.firstName = tokens[i];
+                    extracted.lastName = tokens[i + 1];
+                    if (tokens[i + 2] && isCap(tokens[i + 2])) {
+                        extracted.lastName += ' ' + tokens[i + 2];
+                    }
+                    break;
+                }
+            }
+        }
+
+        // --- Name Strategy 3: Line-by-line fallback ---
+        if (!extracted.firstName) {
+            const lines = text.split(/[\n|]/).map(l => l.trim()).filter(Boolean);
+            for (const line of lines.slice(0, 15)) {
+                if (/[@\d|\u2022|http|www|linkedin|github|resume|curriculum]/i.test(line)) continue;
+                const parts = line.trim().split(/\s+/);
+                if (parts.length >= 2 && parts.length <= 4 && parts.every(p => /^[A-Za-z.'-]+$/.test(p))) {
+                    extracted.firstName = parts[0];
+                    extracted.lastName = parts.slice(1).join(' ');
+                    break;
+                }
             }
         }
 
