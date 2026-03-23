@@ -297,6 +297,14 @@ const App = (() => {
             DOM.pagination.appendChild(btn);
         };
 
+        const scrollToJobsTop = () => {
+            const jobsSection = document.querySelector('.v4_info_joinus_v2-jobs') || document.querySelector('.v4_info_joinus_v2-jobs-header');
+            if (jobsSection) {
+                const y = jobsSection.getBoundingClientRect().top + window.scrollY - 30; // 30px breathing room
+                window.scrollTo({ top: y, behavior: 'smooth' });
+            }
+        };
+
         // Render [Prev] Button
         mountButton(
             '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>',
@@ -304,6 +312,7 @@ const App = (() => {
             () => { 
                 State.currentPage--; 
                 renderJobGrid(); 
+                scrollToJobsTop();
             }
         );
 
@@ -315,6 +324,7 @@ const App = (() => {
                 () => { 
                     State.currentPage = i; 
                     renderJobGrid(); 
+                    scrollToJobsTop();
                 },
                 State.currentPage === i ? 'active' : ''
             );
@@ -327,6 +337,7 @@ const App = (() => {
             () => { 
                 State.currentPage++; 
                 renderJobGrid(); 
+                scrollToJobsTop();
             }
         );
     };
