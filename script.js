@@ -512,31 +512,109 @@ const App = (() => {
     };
 
     /**
-     * File processing logic + Simulator Auto-fill Logic
+     * Extracts structured fields from resume text using Regex.
+     * Detects: Email, Phone, and First/Last Name from the document content.
+     * @param {string} text - Raw text extracted from the uploaded document
      */
-    const handleFileUpload = (file) => {
+    const parseResumeText = (text) => {
+        const extracted = {};
+
+        // --- Email: match standard email patterns ---
+        const emailMatch = text.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
+        if (emailMatch) extracted.email = emailMatch[0];
+
+        // --- Phone: handle various international formats ---
+        const phoneMatch = text.match(/(\+?\d[\d\s\-().]{6,}\d)/);
+        if (phoneMatch) extracted.phone = phoneMatch[0].trim();
+
+        // --- Name: typically the first non-empty line of a resume ---
+        const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+        for (const line of lines) {
+            // Skip lines that look like contact info or headers
+            if (/[@\d|•|http|www|linkedin|github]/i.test(line)) continue;
+            // Name lines are usually 2-4 words of only letters
+            const nameParts = line.split(/\s+/);
+            if (nameParts.length >= 2 && nameParts.length <= 5 && nameParts.every(p => /^[a-zA-Z.'-]+$/.test(p))) {
+                extracted.firstName = nameParts[0];
+                extracted.lastName = nameParts.slice(1).join(' ');
+                break;
+            }
+        }
+
+        return extracted;
+    };
+
+    /**
+     * Fills form fields with parsed resume data.
+     * @param {Object} data - Extracted resume fields
+     */
+    const autofillForm = (data) => {
+        const fieldMap = { firstName: data.firstName, lastName: data.lastName, email: data.email, phone: data.phone };
+        Object.entries(fieldMap).forEach(([id, value]) => {
+            if (!value) return;
+            const field = document.getElementById(id);
+            if (field) {
+                field.value = value;
+                field.dispatchEvent(new Event('input')); // Clears validation errors organically
+            }
+        });
+    };
+
+    /**
+     * Handles actual file parsing: uses PDF.js for PDFs, Mammoth.js for DOCX.
+     * Gracefully degrades to a prompt message for unsupported formats.
+     * @param {File} file - The uploaded resume file
+     */
+    const handleFileUpload = async (file) => {
         if (!file) return;
 
         const validExts = ['pdf', 'doc', 'docx'];
         const ext = file.name.split('.').pop().toLowerCase();
-        
+
         if (!validExts.includes(ext)) return alert('Invalid format. Please upload PDF, DOC, or DOCX.');
         if (file.size > 5 * 1024 * 1024) return alert('File size exceeds 5MB limit.');
 
-        DOM.dropText.textContent = `Parsing resume parameters...`;
+        DOM.dropText.textContent = 'Reading your resume...';
 
-        // Simulate Machine Parsing delays
-        setTimeout(() => {
-            const mock = { firstName: 'Alex', lastName: 'Johnson', email: 'alex.j@example.com', phone: '+1 (555) 123-4567' };
-            Object.keys(mock).forEach(id => {
-                const field = document.getElementById(id);
-                if (field) {
-                    field.value = mock[id];
-                    field.dispatchEvent(new Event('input')); // Dispatches event to clear validation errors organically
+        try {
+            let rawText = '';
+
+            if (ext === 'pdf') {
+                // --- PDF Extraction via PDF.js ---
+                const pdfjsLib = window['pdfjs-dist/build/pdf'];
+                if (!pdfjsLib) throw new Error('PDF.js not loaded');
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                const pages = pdf.numPages;
+                for (let i = 1; i <= pages; i++) {
+                    const page = await pdf.getPage(i);
+                    const content = await page.getTextContent();
+                    rawText += content.items.map(item => item.str).join(' ') + '\n';
                 }
-            });
-            DOM.dropText.textContent = `Attached: ${file.name} (Auto-filled fields)`;
-        }, 800);
+            } else if (ext === 'docx') {
+                // --- DOCX Extraction via Mammoth.js ---
+                if (!window.mammoth) throw new Error('Mammoth.js not loaded');
+                const arrayBuffer = await file.arrayBuffer();
+                const result = await window.mammoth.extractRawText({ arrayBuffer });
+                rawText = result.value;
+            } else {
+                // DOC files are binary — ask user to save as DOCX or PDF
+                DOM.dropText.innerHTML = `<strong>${file.name}</strong> attached. Please fill details manually (DOC format parsing not supported).`;
+                return;
+            }
+
+            const parsed = parseResumeText(rawText);
+            autofillForm(parsed);
+
+            const filled = Object.values(parsed).filter(Boolean).length;
+            DOM.dropText.innerHTML = `<strong>${file.name}</strong> — ${filled} field${filled !== 1 ? 's' : ''} auto-filled from your resume.`;
+
+        } catch (err) {
+            console.error('Resume parse error:', err);
+            DOM.dropText.innerHTML = `<strong>${file.name}</strong> attached. Could not auto-parse — please fill in details manually.`;
+        }
     };
 
     // --- Modal Management Globals ---
