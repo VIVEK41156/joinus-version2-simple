@@ -388,6 +388,7 @@ a:hover { text-decoration: underline; }
 .v4_info_joinus_v2-jobs-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  align-content: start;
   gap: 24px;
   margin-bottom: 40px;
 }

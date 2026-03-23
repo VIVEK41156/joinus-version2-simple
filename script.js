@@ -89,6 +89,51 @@ const App = (() => {
             exp: '2-5 Years',
             shortDesc: 'Help us grow our brand presence through dynamic marketing campaigns and SEO optimization strategies.',
             fullDesc: '<div class="v4_info_joinus_v2-job-details-header"><h2 class="v4_info_joinus_v2-job-title">Marketing Specialist</h2><div class="v4_info_joinus_v2-job-meta"><span class="v4_info_joinus_v2-job-meta-item">Hyderabad</span> • <span class="v4_info_joinus_v2-job-meta-item">2-5 Years Exp</span></div></div><h4>About the Role</h4><p>You will execute marketing campaigns.</p><h4>Requirements</h4><ul><li>SEO, SEM, Copywriting.</li></ul>'
+        },
+        {
+            id: 8,
+            title: 'Data Scientist',
+            openings: [{ location: 'Bangalore', count: 2 }],
+            type: 'Full-time',
+            exp: '3-6 Years',
+            shortDesc: 'Analyze expansive, complex datasets to drive strategic business decisions.',
+            fullDesc: '<div class="v4_info_joinus_v2-job-details-header"><h2 class="v4_info_joinus_v2-job-title">Data Scientist</h2><div class="v4_info_joinus_v2-job-meta"><span class="v4_info_joinus_v2-job-meta-item">Bangalore</span> • <span class="v4_info_joinus_v2-job-meta-item">3-6 Years Exp</span></div></div><h4>About the Role</h4><p>Build predictive models.</p><h4>Requirements</h4><ul><li>Python, R, Machine Learning.</li></ul>'
+        },
+        {
+            id: 9,
+            title: 'HR Manager',
+            openings: [{ location: 'Hyderabad', count: 1 }],
+            type: 'Full-time',
+            exp: '5-8 Years',
+            shortDesc: 'Lead our human resources department and foster a tremendous company culture.',
+            fullDesc: '<div class="v4_info_joinus_v2-job-details-header"><h2 class="v4_info_joinus_v2-job-title">HR Manager</h2><div class="v4_info_joinus_v2-job-meta"><span class="v4_info_joinus_v2-job-meta-item">Hyderabad</span> • <span class="v4_info_joinus_v2-job-meta-item">5-8 Years Exp</span></div></div><h4>About the Role</h4><p>Manage employee relations.</p><h4>Requirements</h4><ul><li>Strong communication and leadership.</li></ul>'
+        },
+        {
+            id: 10,
+            title: 'Quality Assurance Tester',
+            openings: [{ location: 'Bangalore', count: 3 }],
+            type: 'Full-time',
+            exp: '1-3 Years',
+            shortDesc: 'Ensure absolute software reliability through rigorous automated testing protocols.',
+            fullDesc: '<div class="v4_info_joinus_v2-job-details-header"><h2 class="v4_info_joinus_v2-job-title">QA Tester</h2><div class="v4_info_joinus_v2-job-meta"><span class="v4_info_joinus_v2-job-meta-item">Bangalore</span> • <span class="v4_info_joinus_v2-job-meta-item">1-3 Years Exp</span></div></div><h4>About the Role</h4><p>Write test cases.</p><h4>Requirements</h4><ul><li>Selenium, Cypress, Jest.</li></ul>'
+        },
+        {
+            id: 11,
+            title: 'React Native Developer',
+            openings: [{ location: 'Bangalore', count: 2 }, { location: 'Hyderabad', count: 1 }],
+            type: 'Full-time',
+            exp: '2-4 Years',
+            shortDesc: 'Develop robust cross-platform mobile applications for millions of active users.',
+            fullDesc: '<div class="v4_info_joinus_v2-job-details-header"><h2 class="v4_info_joinus_v2-job-title">React Native Developer</h2><div class="v4_info_joinus_v2-job-meta"><span class="v4_info_joinus_v2-job-meta-item">Bangalore, Hyderabad</span> • <span class="v4_info_joinus_v2-job-meta-item">2-4 Years Exp</span></div></div><h4>About the Role</h4><p>Build iOS/Android apps.</p><h4>Requirements</h4><ul><li>React Native, iOS, Android.</li></ul>'
+        },
+        {
+            id: 12,
+            title: 'Chief Technology Officer',
+            openings: [{ location: 'Bangalore', count: 1 }],
+            type: 'Full-time',
+            exp: '10+ Years',
+            shortDesc: 'A visionary leader directing the entire engineering department toward monumental scale.',
+            fullDesc: '<div class="v4_info_joinus_v2-job-details-header"><h2 class="v4_info_joinus_v2-job-title">CTO</h2><div class="v4_info_joinus_v2-job-meta"><span class="v4_info_joinus_v2-job-meta-item">Bangalore</span> • <span class="v4_info_joinus_v2-job-meta-item">10+ Years Exp</span></div></div><h4>About the Role</h4><p>Lead architecture decisions.</p><h4>Requirements</h4><ul><li>Executive experience.</li></ul>'
         }
     ];
 
@@ -259,7 +304,6 @@ const App = (() => {
             () => { 
                 State.currentPage--; 
                 renderJobGrid(); 
-                document.querySelector('.v4_info_joinus_v2-jobs-header')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         );
 
@@ -271,7 +315,6 @@ const App = (() => {
                 () => { 
                     State.currentPage = i; 
                     renderJobGrid(); 
-                    document.querySelector('.v4_info_joinus_v2-jobs-header')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 },
                 State.currentPage === i ? 'active' : ''
             );
@@ -284,7 +327,6 @@ const App = (() => {
             () => { 
                 State.currentPage++; 
                 renderJobGrid(); 
-                document.querySelector('.v4_info_joinus_v2-jobs-header')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         );
     };
