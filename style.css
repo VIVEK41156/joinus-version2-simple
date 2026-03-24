@@ -238,9 +238,12 @@ a:hover { text-decoration: underline; }
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-.v4_info_joinus_v2-growth-icon svg {
-  width: 18px;
-  height: 18px;
+.v4_info_joinus_v2-growth-icon svg,
+.v4_info_joinus_v2-tick-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  /* Adjust width/height (e.g., to 18px) if your image is only the tick without the background circle */
 }
 
 .v4_info_joinus_v2-growth-card-wrapper {
