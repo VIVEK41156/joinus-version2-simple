@@ -229,13 +229,9 @@ a:hover { text-decoration: underline; }
   flex-shrink: 0;
   width: 32px;
   height: 32px;
-  background-color: var(--v4-joinus-primary-dark);
-  color: var(--v4-joinus-tertiary);
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .v4_info_joinus_v2-growth-icon svg,
